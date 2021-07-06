@@ -61,7 +61,7 @@ FOR EACH ROW
 BEGIN 
     IF (NEW.category_id IS NULL) OR (NEW.category_id = 1) THEN 
         SET NEW.category_id := 18; 
-    ELSEIF NEW.transaction_type = 'D' 
+    ELSEIF NEW.transaction_type = 'D' THEN 
         SET NEW.category_id := 1; 
     END IF; 
 END $$

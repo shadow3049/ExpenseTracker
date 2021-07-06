@@ -1,6 +1,9 @@
 DROP PROCEDURE IF EXISTS delete_by_id;
 DROP PROCEDURE IF EXISTS insert_transaction;
 DROP PROCEDURE IF EXISTS custom_category;
+DROP PROCEDURE IF EXISTS add_account;
+DROP PROCEDURE IF EXISTS delete_account;
+DROP PROCEDURE IF EXISTS delete_category;
 
 DELIMITER $$
  
@@ -58,8 +61,8 @@ END $$
 DELIMITER $$
 
 CREATE PROCEDURE add_account(
-    IN input_acc_name, 
-    input_acc_mode 
+    IN input_acc_name VARCHAR(30), 
+    IN input_acc_mode VARCHAR(10)
 ) BEGIN 
     INSERT INTO accounts 
         (acc_name, mode) 
@@ -70,7 +73,7 @@ END $$
 DELIMITER $$
 
 CREATE PROCEDURE custom_category(
-    IN input_category
+    IN input_category VARCHAR(30)
 ) BEGIN 
     INSERT INTO categories 
         (category_name) 
@@ -81,11 +84,21 @@ END $$
 DELIMITER $$
 
 CREATE PROCEDURE delete_account(
-    IN input_acc_name
+    IN input_acc_name VARCHAR(30)
 ) BEGIN 
     DELETE 
     FROM accounts 
     WHERE accounts.acc_name = input_acc_name;
+END $$
+
+DELIMITER $$
+
+CREATE PROCEDURE delete_category(
+    IN input_category_name VARCHAR(30)
+) BEGIN 
+    DELETE 
+    FROM categories 
+    WHERE categories.category_name = input_category_name;
 END $$
 
 DELIMITER ;
