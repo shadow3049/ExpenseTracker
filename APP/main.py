@@ -1,8 +1,9 @@
-from mysql.connector import connect, connection
-from dotenv import load_dotenv
 import getpass
 import os
 
+from dotenv import load_dotenv
+from mysql.connector import connect, connection, MySQLConnection
+from mysql.connector.cursor import MySQLCursor
 from mysql.connector.errors import ProgrammingError
 
 load_dotenv()
@@ -10,8 +11,10 @@ load_dotenv()
 mysql_host = os.getenv('MYSQL_HOST')
 mysql_port = os.getenv('MYSQL_port')
 debug = os.getenv('DEBUG')
+auto_Commit = False if debug != 1 else True
 
 if debug != '1':
+    # debug=False
     password = getpass.getpass(prompt='Enter Password')
 else:
     password = 'test123'
@@ -23,28 +26,18 @@ def first_run():
     cursor.execute('''CREATE DATABASE expenses''')
     cursor.execute('''USE expenses''')
 
-    for query in open('../SQL/Create_tables.sql').read().split(';'):
-        if len(query) != 0:
-            query += ';'
-            cursor.execute(query)
+    delimiter: list = [';', '$$', ';', '$$', ';']
 
-    for query in open('../SQL/Triggers.sql').read().split('$$'):
-        if len(query) != 0:
-            cursor.execute(query)
-
-    for query in open('../SQL/Insert_into.sql').read().split(';'):
-        if len(query) != 0:
-            query += ';'
-        cursor.execute(query)
-
-    for query in open('../SQL/Procedures.sql').read().split('$$'):
-        if len(query) != 0:
-            cursor.execute(query)
-
-    for query in open('../SQL/Views.sql').read().split(';'):
-        if len(query) != 0:
-            query += ';'
-            cursor.execute(query)
+    for i, _ in enumerate([
+        open('./SQL/Create_tables.sql'),
+        open('./SQL/Triggers.sql'),
+        open('./SQL/Insert_into.sql'),
+        open('./SQL/Procedures.sql'),
+        open('./SQL/Views.sql')
+    ]):
+        for query in _.read().split(delimiter[i]):
+            if len(query) != 0:
+                cursor.execute(query + ';')
 
     connection.commit()
 
@@ -54,6 +47,7 @@ connection = connect(
     user='root',
     passwd=password,
 )
+connection.autocommit = auto_Commit
 cursor = connection.cursor()
 
 try:
@@ -64,6 +58,31 @@ except ProgrammingError as e:
         first_run()
     else:
         raise e
+finally:
+    cursor.close()
+
+
+class Transactions(object):
+    def __init__(self, conn: MySQLConnection):
+        self.conn = conn
+        self.cur: MySQLCursor = conn.cursor()
+
+    def insert_transac(self, date: str, desc: str, category: str, amt: float, amt_type: str, acc: str):
+        self.cur.callproc('insert_transaction', [date, desc, category, amt, amt_type, acc])
+
+
+class Passbook(object):
+
+    def __init__(self, conn: MySQLConnection):
+        self.conn = conn
+        self.cur: MySQLCursor = conn.cursor()
+
+    # TODO
+    def view_transactions(self, **kwargs):
+        need_sorted = kwargs.get('sort')
+        if need_sorted != None:
+            sort_by = kwargs.get('sort_by')
+
 
 # * Database is named as expenses
 # * Inside database are three tables
