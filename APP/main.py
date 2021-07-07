@@ -1,40 +1,69 @@
 from mysql.connector import connect, connection
+from dotenv import load_dotenv
+import getpass
+import os
+
+from mysql.connector.errors import ProgrammingError
+
+load_dotenv()
+
+mysql_host = os.getenv('MYSQL_HOST')
+mysql_port = os.getenv('MYSQL_port')
+debug = os.getenv('DEBUG')
+
+if debug != '1':
+    password = getpass.getpass(prompt='Enter Password')
+else:
+    password = 'test123'
+
+
+def first_run():
+    global cursor
+
+    cursor.execute('''CREATE DATABASE expenses''')
+    cursor.execute('''USE expenses''')
+
+    for query in open('../SQL/Create_tables.sql').read().split(';'):
+        if len(query) != 0:
+            query += ';'
+            cursor.execute(query)
+
+    for query in open('../SQL/Triggers.sql').read().split('$$'):
+        if len(query) != 0:
+            cursor.execute(query)
+
+    for query in open('../SQL/Insert_into.sql').read().split(';'):
+        if len(query) != 0:
+            query += ';'
+        cursor.execute(query)
+
+    for query in open('../SQL/Procedures.sql').read().split('$$'):
+        if len(query) != 0:
+            cursor.execute(query)
+
+    for query in open('../SQL/Views.sql').read().split(';'):
+        if len(query) != 0:
+            query += ';'
+            cursor.execute(query)
+
+    connection.commit()
+
 
 connection = connect(
-    host='localhost',
+    host=mysql_host,
     user='root',
-    passwd='',
-    database='expenses'
-);
-
+    passwd=password,
+)
 cursor = connection.cursor()
 
-for query in open('./SQL/Create_tables.sql').read().split(';'):
-    if len(query) != 0:
-        query += ';'
-        cursor.execute(query)
+try:
+    cursor.execute('''USE expenses''')
 
-for query in open('./SQL/Triggers.sql').read().split('$$'):
-    if len(query) != 0:
-        cursor.execute(query)
-
-for query in open('./SQL/Insert_into.sql').read().split(';'):
-    if len(query) != 0:
-        query += ';'
-        cursor.execute(query)
-
-for query in open('./SQL/Procedures.sql').read().split('$$'):
-    if len(query) != 0:
-        cursor.execute(query)
-
-for query in open('./SQL/Views.sql').read().split(';'):
-    if len(query) != 0:
-        query += ';'
-        cursor.execute(query)
-
-connection.commit()
-cursor.close()
-connection.close()
+except ProgrammingError as e:
+    if e.errno == 1049:
+        first_run()
+    else:
+        raise e
 
 # * Database is named as expenses
 # * Inside database are three tables
