@@ -1,25 +1,21 @@
-DROP PROCEDURE IF EXISTS delete_by_id;
-DROP PROCEDURE IF EXISTS insert_transaction;
-DROP PROCEDURE IF EXISTS custom_category;
-DROP PROCEDURE IF EXISTS add_account;
-DROP PROCEDURE IF EXISTS delete_account;
-DROP PROCEDURE IF EXISTS delete_category;
-
-DELIMITER $$
+DROP PROCEDURE IF EXISTS delete_by_id $$
+DROP PROCEDURE IF EXISTS insert_transaction $$
+DROP PROCEDURE IF EXISTS custom_category $$
+DROP PROCEDURE IF EXISTS add_account $$
+DROP PROCEDURE IF EXISTS delete_account $$
+DROP PROCEDURE IF EXISTS delete_category $$
  
 CREATE PROCEDURE delete_by_id(in input_id INT)
 BEGIN 
     DELETE 
     FROM transactions
     WHERE transactions.id = input_id;
-END; $$ 
-
-DELIMITER $$
+END $$
 
 CREATE PROCEDURE insert_transaction(
-    IN input_date DATE,
-    IN input_desc VARCHAR(50),
-    IN input_categ VARCHAR(30),
+    IN input_date DATE, 
+    IN input_desc VARCHAR(50), 
+    IN input_categ VARCHAR(30), 
     IN input_amt DECIMAL(10, 2),
     IN input_type VARCHAR(1),
     IN input_account VARCHAR(30)
@@ -58,8 +54,6 @@ CREATE PROCEDURE insert_transaction(
     );
 END $$ 
 
-DELIMITER $$
-
 CREATE PROCEDURE add_account(
     IN input_acc_name VARCHAR(30), 
     IN input_acc_mode VARCHAR(10)
@@ -70,8 +64,6 @@ CREATE PROCEDURE add_account(
         (input_acc_name, input_acc_mode);
 END $$
 
-DELIMITER $$
-
 CREATE PROCEDURE custom_category(
     IN input_category VARCHAR(30)
 ) BEGIN 
@@ -81,8 +73,6 @@ CREATE PROCEDURE custom_category(
         (input_category);
 END $$
 
-DELIMITER $$
-
 CREATE PROCEDURE delete_account(
     IN input_acc_name VARCHAR(30)
 ) BEGIN 
@@ -91,7 +81,6 @@ CREATE PROCEDURE delete_account(
     WHERE accounts.acc_name = input_acc_name;
 END $$
 
-DELIMITER $$
 
 CREATE PROCEDURE delete_category(
     IN input_category_name VARCHAR(30)
@@ -100,5 +89,3 @@ CREATE PROCEDURE delete_category(
     FROM categories 
     WHERE categories.category_name = input_category_name;
 END $$
-
-DELIMITER ;

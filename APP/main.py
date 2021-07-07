@@ -1,4 +1,36 @@
-from mysql.connector import connect
+from mysql.connector import connect, connection
+
+connection = connect(
+    host='localhost',
+    user='root',
+    passwd='',
+    database='expenses'
+);
+
+cursor = connection.cursor()
+
+for query in open('./SQL/Create_tables.sql').read().split(';'):
+    if len(query) != 0:
+        query += ';'
+        cursor.execute(query)
+
+for query in open('./SQL/Triggers.sql').read().split('$$'):
+    if len(query) != 0:
+        cursor.execute(query)
+
+for query in open('./SQL/Insert_into.sql').read().split(';'):
+    if len(query) != 0:
+        query += ';'
+        cursor.execute(query)
+
+for query in open('./SQL/Procedures.sql').read().split('$$'):
+    if len(query) != 0:
+        cursor.execute(query)
+
+for query in open('./SQL/Views.sql').read().split(';'):
+    if len(query) != 0:
+        query += ';'
+        cursor.execute(query)
 
 
 # * Database is named as expenses
