@@ -32,6 +32,9 @@ for query in open('./SQL/Views.sql').read().split(';'):
         query += ';'
         cursor.execute(query)
 
+connection.commit()
+cursor.close()
+connection.close()
 
 # * Database is named as expenses
 # * Inside database are three tables
