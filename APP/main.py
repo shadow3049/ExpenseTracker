@@ -1,40 +1,41 @@
-from mysql.connector import connect, connection
+from mysql.connector import connect, Error
 
-connection = connect(
-    host='localhost',
-    user='root',
-    passwd='',
-    database='expenses'
-);
 
-cursor = connection.cursor()
+try:
+    connection = connect(
+        host='localhost',
+        user='root',
+        passwd='',
+        database='expenses'
+    )
 
-for query in open('./SQL/Create_tables.sql').read().split(';'):
-    if len(query) != 0:
-        query += ';'
-        cursor.execute(query)
+    connection.autocommit = False
+    cursor = connection.cursor()
 
-for query in open('./SQL/Triggers.sql').read().split('$$'):
-    if len(query) != 0:
-        cursor.execute(query)
+    delimiter: list = [';', '$$', ';', '$$', ';']
 
-for query in open('./SQL/Insert_into.sql').read().split(';'):
-    if len(query) != 0:
-        query += ';'
-        cursor.execute(query)
+    for i, _ in enumerate([
+        open('./SQL/Create_tables.sql'),
+        open('./SQL/Triggers.sql'),
+        open('./SQL/Insert_into.sql'),
+        open('./SQL/Procedures.sql'),
+        open('./SQL/Views.sql')
+    ]):
+        for query in _.read().split(delimiter[i]):
+            if len(query) != 0:
+                cursor.execute(query + ';') 
 
-for query in open('./SQL/Procedures.sql').read().split('$$'):
-    if len(query) != 0:
-        cursor.execute(query)
+    connection.commit()
 
-for query in open('./SQL/Views.sql').read().split(';'):
-    if len(query) != 0:
-        query += ';'
-        cursor.execute(query)
+except mysql.connector.Error as error:
+    print('Failed to initialize Database')
+    print(f'Error: {error}')
+    connection.rollback()
 
-connection.commit()
-cursor.close()
-connection.close()
+finally:
+    if connection.is_connected():
+        cursor.close()
+        connection.close()
 
 # * Database is named as expenses
 # * Inside database are three tables

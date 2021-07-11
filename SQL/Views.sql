@@ -50,17 +50,6 @@ WHERE transaction_type = 'C'
 GROUP BY YEAR(tdate), MONTHNAME(tdate) 
 ORDER BY YEAR(tdate), MONTHNAME(tdate);
 
-CREATE OR REPLACE VIEW `Category wise expenditure` AS
-SELECT 
-    category_id AS `Category ID`,
-    category_name AS `Category`, 
-    IFNULL(sum(amount), 0) AS `Spent`
-FROM transactions JOIN categories 
-USING (category_id) 
-WHERE transaction_type = 'D' 
-GROUP BY category_name, category_id
-ORDER BY sum(amount), category_id;
-
 CREATE OR REPLACE VIEW `Monthly Savings` AS 
 SELECT DISTINCT
     YEAR(t1.tdate) as `Year`,
