@@ -8,6 +8,9 @@ DROP PROCEDURE IF EXISTS check_balance $$
 DROP PROCEDURE IF EXISTS Passbook $$
 DROP PROCEDURE IF EXISTS category_wise_spending $$
 DROP PROCEDURE IF EXISTS monthly_categorywise_spending $$
+DROP PROCEDURE IF EXISTS monthwise_spending $$
+DROP PROCEDURE IF EXISTS monthwise_income $$
+DROP PROCEDURE IF EXISTS monthwise_saving $$
 
 -- Displays the balance of given account name
 CREATE PROCEDURE check_balance (
