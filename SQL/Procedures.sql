@@ -143,6 +143,7 @@ CREATE PROCEDURE monthwise_income (
             `month wise income` 
         WHERE 
             `Month` BETWEEN MONTHNAME(startdate) AND MONTHNAME(enddate);
+    END IF;
 END $$
 
 CREATE PROCEDURE monthwise_saving (
