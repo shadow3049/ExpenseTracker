@@ -4,7 +4,174 @@ DROP PROCEDURE IF EXISTS custom_category $$
 DROP PROCEDURE IF EXISTS add_account $$
 DROP PROCEDURE IF EXISTS delete_account $$
 DROP PROCEDURE IF EXISTS delete_category $$
- 
+DROP PROCEDURE IF EXISTS check_balance $$
+DROP PROCEDURE IF EXISTS Passbook $$
+DROP PROCEDURE IF EXISTS category_wise_spending $$
+DROP PROCEDURE IF EXISTS monthly_categorywise_spending $$
+DROP PROCEDURE IF EXISTS monthwise_spending $$
+DROP PROCEDURE IF EXISTS monthwise_income $$
+DROP PROCEDURE IF EXISTS monthwise_saving $$
+
+-- Displays the balance of given account name
+CREATE PROCEDURE check_balance (
+    IN acc_name VARCHAR(30)
+) BEGIN 
+    SELECT 
+        *
+    FROM 
+        `account balance`
+    WHERE 
+        `Account Name` = input_acc_name;
+END $$
+
+-- Lists all transactions between startdate and enddate;
+CREATE PROCEDURE Passbook (
+    IN startdate DATE,
+    IN enddate DATE
+) BEGIN 
+    IF (startdate > enddate) THEN
+        SIGNAL SQLSTATE '60000' SET MESSAGE_TEXT = 'Invalid dates';
+    END IF;
+
+    SELECT 
+        * 
+    FROM 
+        `passbook` 
+    WHERE 
+        `Date of Transaction` BETWEEN stardate AND enddate;
+END $$
+
+-- Gives the category wise spending between startdate and enddate
+CREATE PROCEDURE category_wise_spending (
+    IN startdate DATE,
+    IN enddate DATE
+) BEGIN 
+    IF (startdate > enddate) THEN
+        SIGNAL SQLSTATE '60000' SET MESSAGE_TEXT = 'Invalid dates';
+    END IF;
+
+    SELECT 
+        category_id AS `Category ID`,
+        category_name AS `Category`, 
+        IFNULL(sum(amount), 0) AS `Spent`
+    FROM 
+        transactions JOIN categories USING (category_id) 
+    WHERE  
+        transaction_type = 'D' AND 
+        transactions.tdate BETWEEN startdate AND enddate 
+    GROUP BY 
+        category_name, category_id
+    ORDER BY 
+        sum(amount) DESC, category_id;
+END $$
+
+CREATE PROCEDURE monthly_categorywise_spending (
+    IN startdate DATE,
+    IN enddate DATE
+) BEGIN 
+    IF (startdate > enddate) THEN
+        SIGNAL SQLSTATE '60000' SET MESSAGE_TEXT = 'Invalid dates';
+    END IF;
+
+    IF (YEAR(enddate) > YEAR(startdate)) THEN
+        SELECT 
+            * 
+        FROM 
+            `monthly expenditure category wise` 
+        WHERE 
+            `Year` BETWEEN YEAR(stardate) AND YEAR(enddate) AND 
+            `Month` BETWEEN MONTHNAME(startdate) AND MONTHNAME(enddate);
+    ELSE 
+        SELECT 
+            `Month`,
+            `Category`
+        FROM 
+            `monthly expenditure category wise` 
+        WHERE 
+            `Month` BETWEEN MONTHNAME(startdate) AND MONTHNAME(enddate);
+    END IF;
+END $$
+
+CREATE PROCEDURE monthwise_spending (
+    IN startdate DATE,
+    IN enddate DATE
+) BEGIN 
+    IF (startdate > enddate) THEN
+        SIGNAL SQLSTATE '60000' SET MESSAGE_TEXT = 'Invalid dates';
+    END IF;
+
+    IF (YEAR(enddate) > YEAR(startdate)) THEN
+        SELECT 
+            * 
+        FROM 
+            `month wise expenditure` 
+        WHERE 
+            `Year` BETWEEN YEAR(stardate) AND YEAR(enddate) AND 
+            `Month` BETWEEN MONTHNAME(startdate) AND MONTHNAME(enddate);
+    ELSE 
+        SELECT 
+            `Month`,
+            `Spent`
+        FROM 
+            `month wise expenditure` 
+        WHERE 
+            `Month` BETWEEN MONTHNAME(startdate) AND MONTHNAME(enddate);
+    END IF;
+END $$
+
+CREATE PROCEDURE monthwise_income (
+    IN startdate DATE,
+    IN enddate DATE
+) BEGIN 
+    IF (startdate > enddate) THEN
+        SIGNAL SQLSTATE '60000' SET MESSAGE_TEXT = 'Invalid dates';
+    END IF;
+
+    IF (YEAR(enddate) > YEAR(startdate)) THEN
+        SELECT 
+            * 
+        FROM 
+            `month wise income` 
+        WHERE 
+            `Year` BETWEEN YEAR(stardate) AND YEAR(enddate) AND 
+            `Month` BETWEEN MONTHNAME(startdate) AND MONTHNAME(enddate);
+    ELSE 
+        SELECT 
+            `Month`,
+            `Income`
+        FROM 
+            `month wise income` 
+        WHERE 
+            `Month` BETWEEN MONTHNAME(startdate) AND MONTHNAME(enddate);
+END $$
+
+CREATE PROCEDURE monthwise_saving (
+    IN startdate DATE,
+    IN enddate DATE
+) BEGIN 
+    IF (startdate > enddate) THEN
+        SIGNAL SQLSTATE '60000' SET MESSAGE_TEXT = 'Invalid dates';
+    END IF;
+
+    IF (YEAR(enddate) > YEAR(enddate)) THEN
+        SELECT 
+            * 
+        FROM 
+            `monthly savings` 
+        WHERE 
+            `Year` BETWEEN YEAR(stardate) AND YEAR(enddate) AND 
+            `Month` BETWEEN MONTHNAME(startdate) AND MONTHNAME(enddate);
+    ELSE 
+        SELECT 
+            `Month`,
+            `Savings`
+        FROM 
+            `monthly savings` 
+        WHERE 
+            `Month` BETWEEN MONTHNAME(startdate) AND MONTHNAME(enddate);
+    END IF;
+END $$
+
 CREATE PROCEDURE delete_by_id(in input_id INT)
 BEGIN 
     DELETE 
