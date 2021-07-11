@@ -1,16 +1,30 @@
-from mysql.connector import connect, Error
+import getpass
+import os
+
+from dotenv import load_dotenv
+from mysql.connector import connect, connection, MySQLConnection
+from mysql.connector.cursor import MySQLCursor
+from mysql.connector.errors import ProgrammingError
+
+load_dotenv()
+
+mysql_host = os.getenv('MYSQL_HOST')
+mysql_port = os.getenv('MYSQL_port')
+debug = os.getenv('DEBUG')
+auto_Commit = False if debug != 1 else True
+
+if debug != '1':
+    # debug=False
+    password = getpass.getpass(prompt='Enter Password')
+else:
+    password = 'test123'
 
 
-try:
-    connection = connect(
-        host='localhost',
-        user='root',
-        passwd='',
-        database='expenses'
-    )
+def first_run():
+    global cursor
 
-    connection.autocommit = False
-    cursor = connection.cursor()
+    cursor.execute('''CREATE DATABASE expenses''')
+    cursor.execute('''USE expenses''')
 
     delimiter: list = [';', '$$', ';', '$$', ';']
 
@@ -23,19 +37,52 @@ try:
     ]):
         for query in _.read().split(delimiter[i]):
             if len(query) != 0:
-                cursor.execute(query + ';') 
+                cursor.execute(query + ';')
 
     connection.commit()
 
-except mysql.connector.Error as error:
-    print('Failed to initialize Database')
-    print(f'Error: {error}')
-    connection.rollback()
 
+connection = connect(
+    host=mysql_host,
+    user='root',
+    passwd=password,
+)
+connection.autocommit = auto_Commit
+cursor = connection.cursor()
+
+try:
+    cursor.execute('''USE expenses''')
+
+except ProgrammingError as e:
+    if e.errno == 1049:
+        first_run()
+    else:
+        raise e
 finally:
-    if connection.is_connected():
-        cursor.close()
-        connection.close()
+    cursor.close()
+
+
+class Transactions(object):
+    def __init__(self, conn: MySQLConnection):
+        self.conn = conn
+        self.cur: MySQLCursor = conn.cursor()
+
+    def insert_transac(self, date: str, desc: str, category: str, amt: float, amt_type: str, acc: str):
+        self.cur.callproc('insert_transaction', [date, desc, category, amt, amt_type, acc])
+
+
+class Passbook(object):
+
+    def __init__(self, conn: MySQLConnection):
+        self.conn = conn
+        self.cur: MySQLCursor = conn.cursor()
+
+    # TODO
+    def view_transactions(self, **kwargs):
+        need_sorted = kwargs.get('sort')
+        if need_sorted != None:
+            sort_by = kwargs.get('sort_by')
+
 
 # * Database is named as expenses
 # * Inside database are three tables
