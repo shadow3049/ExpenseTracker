@@ -81,3 +81,16 @@ BEGIN
     FROM transactions 
     WHERE transactions.category_id = OLD.category_id;
 END $$
+
+DROP FUNCTION IF EXISTS TTYPE;
+
+CREATE FUNCTION TTYPE(
+    transaction_type VARCHAR(1)
+) RETURNS VARCHAR(6) DETERMINISTIC  
+BEGIN 
+    IF (transaction_type = 'D') THEN 
+        RETURN 'Debit';
+    ELSE 
+        RETURN 'Credit';
+    END IF;
+END $$

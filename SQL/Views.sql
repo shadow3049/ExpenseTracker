@@ -12,7 +12,7 @@ SELECT
     tdescription AS `Description`,
     category_name AS `Category`, 
     amount AS `Amount`, 
-    transaction_type AS `Credit/Debit`, 
+    TTYPE(transaction_type) AS `Credit/Debit`, 
     acc_name AS `Account Name` 
 FROM transactions JOIN accounts USING (account_id) 
 JOIN categories USING (category_id)
