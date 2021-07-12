@@ -28,8 +28,8 @@ SELECT
 FROM transactions JOIN categories 
 USING(category_id) 
 WHERE transaction_type = 'D' 
-GROUP BY YEAR(tdate), MONTHNAME(tdate), category_name
-ORDER BY YEAR(tdate), MONTHNAME(tdate), sum(amount);
+GROUP BY YEAR(tdate), MONTH(tdate), category_name
+ORDER BY YEAR(tdate), MONTH(tdate), sum(amount);
 
 
 CREATE OR REPLACE VIEW `Month wise expenditure` AS
@@ -39,8 +39,8 @@ SELECT
     IFNULL(sum(amount), 0) AS `Spent` 
 FROM transactions 
 WHERE transaction_type = 'D' 
-GROUP BY YEAR(tdate), MONTHNAME(tdate) 
-ORDER BY YEAR(tdate), MONTHNAME(tdate);
+GROUP BY YEAR(tdate), MONTH(tdate) 
+ORDER BY YEAR(tdate), MONTH(tdate);
 
 CREATE OR REPLACE VIEW `Month wise income` AS
 SELECT 
@@ -49,25 +49,25 @@ SELECT
     IFNULL(sum(amount), 0) AS `Income` 
 FROM transactions 
 WHERE transaction_type = 'C' 
-GROUP BY YEAR(tdate), MONTHNAME(tdate) 
-ORDER BY YEAR(tdate), MONTHNAME(tdate);
+GROUP BY YEAR(tdate), MONTH(tdate) 
+ORDER BY YEAR(tdate), MONTH(tdate);
 
 CREATE OR REPLACE VIEW `Monthly Savings` AS 
-SELECT DISTINCT
-    YEAR(t1.tdate) as `Year`,
+SELECT 
+    YEAR(t1.tdate) as `Year`, 
     MONTH(t1.tdate) as `Month`, 
     (
         SELECT IFNULL(sum(t2.amount), 0) AS 'amt'
         FROM transactions t2 
         WHERE t2.transaction_type = 'C' 
-        AND MONTHNAME(t2.tdate) = MONTHNAME(t1.tdate) 
+        AND MONTH(t2.tdate) = MONTH(t1.tdate) 
         AND YEAR(t2.tdate) = YEAR(t1.tdate)
     ) - (
         SELECT IFNULL(sum(t3.amount), 0) as 'amt'
         FROM transactions t3 
         WHERE t3.transaction_type = 'D' 
-        AND MONTHNAME(t3.tdate) = MONTHNAME(t1.tdate) 
+        AND MONTH(t3.tdate) = MONTH(t1.tdate) 
         AND YEAR(t3.tdate) = YEAR(t1.tdate)
     ) AS `Savings` 
-FROM transactions t1
+FROM transactions t1 
 ORDER BY `Year`, `Month`;

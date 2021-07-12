@@ -21,7 +21,7 @@ CREATE PROCEDURE search_transaction(
     FROM 
         `passbook`
     WHERE 
-        `Description` LIKE CONCAT('%', input_description, '%');
+        LOWER(`Description`) LIKE CONCAT('%', LOWER(input_description), '%');
 END $$
 
 -- Displays the balance of given account name
@@ -95,8 +95,8 @@ CREATE PROCEDURE monthly_categorywise_spending (
             `monthly expenditure category wise` 
         WHERE 
             `Year` BETWEEN YEAR(startdate) + 1 AND YEAR(enddate) - 1 
-            OR `Year` = YEAR(startdate) AND `Month` >= MONTH(startdate) 
-            OR `Year` = YEAR(enddate) AND `Month` <= MONTH(enddate);
+            OR (`Year` = YEAR(startdate) AND `Month` >= MONTH(startdate)) 
+            OR (`Year` = YEAR(enddate) AND `Month` <= MONTH(enddate));
     ELSE 
         SELECT 
             MONTHNAME(CONCAT('2000-', `Month`, '-01')) AS `Month`,
@@ -127,8 +127,8 @@ CREATE PROCEDURE monthwise_spending (
             `month wise expenditure` 
         WHERE 
             `Year` BETWEEN YEAR(startdate) + 1 AND YEAR(enddate) - 1 
-            OR `Year` = YEAR(startdate) AND `Month` >= MONTH(startdate) 
-            OR `Year` = YEAR(enddate) AND `Month` <= MONTH(enddate);
+            OR (`Year` = YEAR(startdate) AND `Month` >= MONTH(startdate))
+            OR (`Year` = YEAR(enddate) AND `Month` <= MONTH(enddate));
     ELSE 
         SELECT 
             MONTHNAME(CONCAT('2000-', `Month`, '-01')) AS `Month`,
@@ -158,8 +158,8 @@ CREATE PROCEDURE monthwise_income (
             `month wise income` 
         WHERE 
             `Year` BETWEEN YEAR(startdate) + 1 AND YEAR(enddate) - 1 
-            OR `Year` = YEAR(startdate) AND `Month` >= MONTH(startdate) 
-            OR `Year` = YEAR(enddate) AND `Month` <= MONTH(enddate);
+            OR (`Year` = YEAR(startdate) AND `Month` >= MONTH(startdate))
+            OR (`Year` = YEAR(enddate) AND `Month` <= MONTH(enddate));
     ELSE 
         SELECT 
             MONTHNAME(CONCAT('2000-', `Month`, '-01')) AS `Month`,
@@ -189,8 +189,8 @@ CREATE PROCEDURE monthwise_saving (
             `monthly savings` 
         WHERE 
             `Year` BETWEEN YEAR(startdate) + 1 AND YEAR(enddate) - 1 
-            OR `Year` = YEAR(startdate) AND `Month` >= MONTH(startdate) 
-            OR `Year` = YEAR(enddate) AND `Month` <= MONTH(enddate);
+            OR (`Year` = YEAR(startdate) AND `Month` >= MONTH(startdate))
+            OR (`Year` = YEAR(enddate) AND `Month` <= MONTH(enddate));
     ELSE 
         SELECT DISTINCT
             MONTHNAME(CONCAT('2000-', `Month`, '-01')) AS `Month`,

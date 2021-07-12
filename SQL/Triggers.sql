@@ -74,7 +74,7 @@ END $$
 -- Didn't use ON DELETE CASCADE because it won't activate
 -- `restore_balance` on child rows that were deleted.  
 CREATE TRIGGER delete_category 
-AFTER DELETE ON categories 
+BEFORE DELETE ON categories 
 FOR EACH ROW 
 BEGIN 
     DELETE 
