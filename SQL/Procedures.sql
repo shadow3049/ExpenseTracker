@@ -14,7 +14,7 @@ DROP PROCEDURE IF EXISTS monthwise_saving $$
 
 -- Displays the balance of given account name
 CREATE PROCEDURE check_balance (
-    IN acc_name VARCHAR(30)
+    IN input_acc_name VARCHAR(30)
 ) BEGIN 
     SELECT 
         *
@@ -38,7 +38,7 @@ CREATE PROCEDURE Passbook (
     FROM 
         `passbook` 
     WHERE 
-        `Date of Transaction` BETWEEN stardate AND enddate;
+        `Date of Transaction` BETWEEN startdate AND enddate;
 END $$
 
 -- Gives the category wise spending between startdate and enddate
@@ -75,20 +75,26 @@ CREATE PROCEDURE monthly_categorywise_spending (
 
     IF (YEAR(enddate) > YEAR(startdate)) THEN
         SELECT 
-            * 
+            `Year`,
+            MONTHNAME(CONCAT('2000-', `Month`, '-01')) AS `Month`,
+            `Category`,
+            `Spent`
         FROM 
             `monthly expenditure category wise` 
         WHERE 
-            `Year` BETWEEN YEAR(stardate) AND YEAR(enddate) AND 
-            `Month` BETWEEN MONTHNAME(startdate) AND MONTHNAME(enddate);
+            `Year` BETWEEN YEAR(startdate) + 1 AND YEAR(enddate) - 1 
+            OR `Year` = YEAR(startdate) AND `Month` >= MONTH(startdate) 
+            OR `Year` = YEAR(enddate) AND `Month` <= MONTH(enddate);
     ELSE 
         SELECT 
-            `Month`,
-            `Category`
+            MONTHNAME(CONCAT('2000-', `Month`, '-01')) AS `Month`,
+            `Category`,
+            `Spent`
         FROM 
             `monthly expenditure category wise` 
         WHERE 
-            `Month` BETWEEN MONTHNAME(startdate) AND MONTHNAME(enddate);
+            `Year` = YEAR(startdate) AND 
+            `Month` BETWEEN MONTH(startdate) AND MONTH(enddate);
     END IF;
 END $$
 
@@ -102,20 +108,24 @@ CREATE PROCEDURE monthwise_spending (
 
     IF (YEAR(enddate) > YEAR(startdate)) THEN
         SELECT 
-            * 
-        FROM 
-            `month wise expenditure` 
-        WHERE 
-            `Year` BETWEEN YEAR(stardate) AND YEAR(enddate) AND 
-            `Month` BETWEEN MONTHNAME(startdate) AND MONTHNAME(enddate);
-    ELSE 
-        SELECT 
-            `Month`,
+            `Year`,
+            MONTHNAME(CONCAT('2000-', `Month`, '-01')) AS `Month`,
             `Spent`
         FROM 
             `month wise expenditure` 
         WHERE 
-            `Month` BETWEEN MONTHNAME(startdate) AND MONTHNAME(enddate);
+            `Year` BETWEEN YEAR(startdate) + 1 AND YEAR(enddate) - 1 
+            OR `Year` = YEAR(startdate) AND `Month` >= MONTH(startdate) 
+            OR `Year` = YEAR(enddate) AND `Month` <= MONTH(enddate);
+    ELSE 
+        SELECT 
+            MONTHNAME(CONCAT('2000-', `Month`, '-01')) AS `Month`,
+            `Spent`
+        FROM 
+            `month wise expenditure` 
+        WHERE 
+            `Year` = YEAR(startdate) AND 
+            `Month` BETWEEN MONTH(startdate) AND MONTH(enddate);
     END IF;
 END $$
 
@@ -129,20 +139,24 @@ CREATE PROCEDURE monthwise_income (
 
     IF (YEAR(enddate) > YEAR(startdate)) THEN
         SELECT 
-            * 
-        FROM 
-            `month wise income` 
-        WHERE 
-            `Year` BETWEEN YEAR(stardate) AND YEAR(enddate) AND 
-            `Month` BETWEEN MONTHNAME(startdate) AND MONTHNAME(enddate);
-    ELSE 
-        SELECT 
-            `Month`,
+            `Year`,
+            MONTHNAME(CONCAT('2000-', `Month`, '-01')) AS `Month`,
             `Income`
         FROM 
             `month wise income` 
         WHERE 
-            `Month` BETWEEN MONTHNAME(startdate) AND MONTHNAME(enddate);
+            `Year` BETWEEN YEAR(startdate) + 1 AND YEAR(enddate) - 1 
+            OR `Year` = YEAR(startdate) AND `Month` >= MONTH(startdate) 
+            OR `Year` = YEAR(enddate) AND `Month` <= MONTH(enddate);
+    ELSE 
+        SELECT 
+            MONTHNAME(CONCAT('2000-', `Month`, '-01')) AS `Month`,
+            `Income`
+        FROM 
+            `month wise income` 
+        WHERE 
+            `Year` = YEAR(startdate) AND 
+            `Month` BETWEEN MONTH(startdate) AND MONTH(enddate);
     END IF;
 END $$
 
@@ -154,22 +168,26 @@ CREATE PROCEDURE monthwise_saving (
         SIGNAL SQLSTATE '60000' SET MESSAGE_TEXT = 'Invalid dates';
     END IF;
 
-    IF (YEAR(enddate) > YEAR(enddate)) THEN
+    IF (YEAR(enddate) > YEAR(startdate)) THEN
         SELECT 
-            * 
-        FROM 
-            `monthly savings` 
-        WHERE 
-            `Year` BETWEEN YEAR(stardate) AND YEAR(enddate) AND 
-            `Month` BETWEEN MONTHNAME(startdate) AND MONTHNAME(enddate);
-    ELSE 
-        SELECT 
-            `Month`,
+            `Year`,
+            MONTHNAME(CONCAT('2000-', `Month`, '-01')) AS `Month`,
             `Savings`
         FROM 
             `monthly savings` 
         WHERE 
-            `Month` BETWEEN MONTHNAME(startdate) AND MONTHNAME(enddate);
+            `Year` BETWEEN YEAR(startdate) + 1 AND YEAR(enddate) - 1 
+            OR `Year` = YEAR(startdate) AND `Month` >= MONTH(startdate) 
+            OR `Year` = YEAR(enddate) AND `Month` <= MONTH(enddate);
+    ELSE 
+        SELECT DISTINCT
+            MONTHNAME(CONCAT('2000-', `Month`, '-01')) AS `Month`,
+            `Savings`
+        FROM 
+            `monthly savings` 
+        WHERE 
+            `Year` = YEAR(startdate) AND 
+            `Month` BETWEEN MONTH(startdate) AND MONTH(enddate);
     END IF;
 END $$
 

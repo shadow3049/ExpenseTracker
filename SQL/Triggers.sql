@@ -18,9 +18,9 @@ CREATE TRIGGER category_of_transaction
 BEFORE INSERT ON transactions 
 FOR EACH ROW 
 BEGIN 
-    IF (NEW.category_id IS NULL) OR (NEW.category_id = 1) THEN 
+    IF (NEW.category_id IS NULL) OR (NEW.category_id = 1 AND NEW.transaction_type = 'D') THEN 
         SET NEW.category_id := 18; 
-    ELSEIF NEW.transaction_type = 'D' THEN 
+    ELSEIF NEW.transaction_type = 'C' THEN 
         SET NEW.category_id := 1; 
     END IF; 
 END $$

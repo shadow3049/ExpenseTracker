@@ -8,19 +8,21 @@ FROM accounts;
 CREATE OR REPLACE VIEW `Passbook` AS 
 SELECT 
     id AS `Transaction ID`,  
-    tdate AS `Date of Transaction`, 
+    tdate AS `Date of Transaction`,
+    tdescription AS `Description`,
     category_name AS `Category`, 
     amount AS `Amount`, 
     transaction_type AS `Credit/Debit`, 
     acc_name AS `Account Name` 
 FROM transactions JOIN accounts USING (account_id) 
-JOIN categories USING (category_id);
+JOIN categories USING (category_id)
+ORDER BY tdate;
    
 
 CREATE OR REPLACE VIEW `Monthly Expenditure Category Wise` AS
 SELECT 
     YEAR(tdate) AS `Year`,
-    MONTHNAME(tdate) AS `Month`, 
+    MONTH(tdate) AS `Month`, 
     category_name AS `Category`, 
     IFNULL(sum(amount), 0) AS `Spent` 
 FROM transactions JOIN categories 
@@ -33,7 +35,7 @@ ORDER BY YEAR(tdate), MONTHNAME(tdate), sum(amount);
 CREATE OR REPLACE VIEW `Month wise expenditure` AS
 SELECT 
     YEAR(tdate) AS `Year`,
-    MONTHNAME(tdate) AS `Month`, 
+    MONTH(tdate) AS `Month`, 
     IFNULL(sum(amount), 0) AS `Spent` 
 FROM transactions 
 WHERE transaction_type = 'D' 
@@ -43,7 +45,7 @@ ORDER BY YEAR(tdate), MONTHNAME(tdate);
 CREATE OR REPLACE VIEW `Month wise income` AS
 SELECT 
     YEAR(tdate) AS `Year`,
-    MONTHNAME(tdate) AS `Month`, 
+    MONTH(tdate) AS `Month`, 
     IFNULL(sum(amount), 0) AS `Income` 
 FROM transactions 
 WHERE transaction_type = 'C' 
@@ -53,7 +55,7 @@ ORDER BY YEAR(tdate), MONTHNAME(tdate);
 CREATE OR REPLACE VIEW `Monthly Savings` AS 
 SELECT DISTINCT
     YEAR(t1.tdate) as `Year`,
-    MONTHNAME(t1.tdate) as `Month`, 
+    MONTH(t1.tdate) as `Month`, 
     (
         SELECT IFNULL(sum(t2.amount), 0) AS 'amt'
         FROM transactions t2 
@@ -67,4 +69,5 @@ SELECT DISTINCT
         AND MONTHNAME(t3.tdate) = MONTHNAME(t1.tdate) 
         AND YEAR(t3.tdate) = YEAR(t1.tdate)
     ) AS `Savings` 
-FROM transactions t1;
+FROM transactions t1
+ORDER BY `Year`, `Month`;
