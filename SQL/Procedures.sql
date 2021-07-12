@@ -11,6 +11,18 @@ DROP PROCEDURE IF EXISTS monthly_categorywise_spending $$
 DROP PROCEDURE IF EXISTS monthwise_spending $$
 DROP PROCEDURE IF EXISTS monthwise_income $$
 DROP PROCEDURE IF EXISTS monthwise_saving $$
+DROP PROCEDURE IF EXISTS search_transaction $$
+
+CREATE PROCEDURE search_transaction(
+    IN input_description VARCHAR(50)
+) BEGIN 
+    SELECT
+        *
+    FROM 
+        `passbook`
+    WHERE 
+        `Description` LIKE CONCAT('%', input_description, '%');
+END $$
 
 -- Displays the balance of given account name
 CREATE PROCEDURE check_balance (
